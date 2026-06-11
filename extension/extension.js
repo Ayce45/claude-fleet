@@ -1,8 +1,8 @@
-/* Claude Fleet — extension GNOME Shell 43/44 (API legacy GJS, pas ESM)
+/* Claude Fleet — GNOME Shell 43/44 extension (legacy GJS API, not ESM)
  *
- * Lit les fichiers d'état écrits par claude-fleet-hook.sh dans
+ * Reads the state files written by claude-fleet-hook.sh in
  *   $XDG_RUNTIME_DIR/claude-fleet/<session_id>.json
- * et affiche un compteur par état dans le panel.
+ * and shows a per-state counter in the panel.
  */
 'use strict';
 
@@ -18,15 +18,15 @@ const STATE_DIR = GLib.build_filenamev([
 const POLL_SECONDS = 2;
 
 const ICONS = {
-    working: '🟢',  // Claude traite une requête
-    waiting: '🟠',  // Claude attend une action de l'utilisateur
-    idle: '⚪',     // Claude a fini / inactif
+    working: '🟢',  // Claude is processing a request
+    waiting: '🟠',  // Claude is waiting for a user action
+    idle: '⚪',     // Claude finished / idle
 };
 const ORDER = { working: 0, waiting: 1, idle: 2 };
 
 function pidAlive(pid) {
     if (!pid || pid <= 0)
-        return true; // pid inconnu -> on ne supprime pas par précaution
+        return true; // unknown pid -> keep the file, just in case
     return GLib.file_test('/proc/' + pid, GLib.FileTest.EXISTS);
 }
 
@@ -69,7 +69,7 @@ class ClaudeFleetIndicator extends PanelMenu.Button {
             en = dir.enumerate_children(
                 'standard::name', Gio.FileQueryInfoFlags.NONE, null);
         } catch (e) {
-            return sessions; // le dossier n'existe pas encore -> 0 session
+            return sessions; // directory does not exist yet -> 0 session
         }
 
         let info;
@@ -96,7 +96,7 @@ class ClaudeFleetIndicator extends PanelMenu.Button {
                 continue;
             }
 
-            // Auto-réparation : fichier orphelin (process claude mort) -> on le supprime
+            // Self-healing: orphan file (claude process is dead) -> remove it
             if (!pidAlive(data.pid)) {
                 try { GLib.unlink(path); } catch (e) {}
                 continue;
@@ -116,23 +116,23 @@ class ClaudeFleetIndicator extends PanelMenu.Button {
         }
         const total = sessions.length;
 
-        // Panel : 🟢2 🟠1 ⚪0  (les "petits logos" demandés)
+        // Panel: 🟢2 🟠1 ⚪0  (the small status badges)
         this._counts.text =
             `${ICONS.working}${counts.working}` +
             ` ${ICONS.waiting}${counts.waiting}` +
             ` ${ICONS.idle}${counts.idle}`;
 
-        // Menu déroulant : résumé + détail par session
+        // Dropdown: summary + per-session detail
         this._section.removeAll();
 
         const summary = new PopupMenu.PopupMenuItem(
-            `${total} session(s) Claude`, { reactive: false });
+            `${total} Claude session(s)`, { reactive: false });
         this._section.addMenuItem(summary);
         this._section.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         if (total === 0) {
             this._section.addMenuItem(new PopupMenu.PopupMenuItem(
-                'Aucune session active', { reactive: false }));
+                'No active session', { reactive: false }));
             return;
         }
 

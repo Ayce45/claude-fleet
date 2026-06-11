@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# claude-fleet-hook.sh — écrit l'état d'une session Claude Code dans un fichier
-# que l'extension GNOME "Claude Fleet" lit en boucle.
+# claude-fleet-hook.sh — writes the state of a Claude Code session to a file
+# that the "Claude Fleet" GNOME extension polls.
 #
-# Usage (appelé par les hooks Claude Code, JSON sur stdin) :
-#   claude-fleet-hook.sh working   # Claude traite une requête (UserPromptSubmit)
-#   claude-fleet-hook.sh waiting   # Claude attend une action user (Notification)
-#   claude-fleet-hook.sh idle      # Claude a fini de répondre (Stop / SessionStart)
-#   claude-fleet-hook.sh end       # Session terminée (SessionEnd) -> supprime le fichier
+# Usage (called by Claude Code hooks, JSON on stdin):
+#   claude-fleet-hook.sh working   # Claude is processing a request (UserPromptSubmit)
+#   claude-fleet-hook.sh waiting   # Claude waits for a user action (Notification)
+#   claude-fleet-hook.sh idle      # Claude finished responding (Stop / SessionStart)
+#   claude-fleet-hook.sh end       # Session ended (SessionEnd) -> removes the file
 #
-# IMPORTANT : ce script n'écrit JAMAIS sur stdout (sinon Claude l'ajoute au contexte
-# pour les hooks UserPromptSubmit/SessionStart). Tout va dans le fichier d'état.
+# IMPORTANT: this script NEVER writes to stdout (otherwise Claude would add it to
+# the context for the UserPromptSubmit/SessionStart hooks). Everything goes to the
+# state file.
 
 set -euo pipefail
 
@@ -17,7 +18,7 @@ state="${1:-idle}"
 dir="${XDG_RUNTIME_DIR:-/tmp}/claude-fleet"
 mkdir -p "$dir"
 
-# Lit le JSON du hook (une seule fois)
+# Read the hook JSON (only once)
 input="$(cat 2>/dev/null || true)"
 
 sid="$(printf '%s' "$input" | jq -r '.session_id // empty' 2>/dev/null || true)"
@@ -31,8 +32,8 @@ if [ "$state" = "end" ]; then
   exit 0
 fi
 
-# Remonte la chaîne des parents pour trouver le vrai PID du process `claude`
-# (utilisé par l'extension pour détecter les sessions mortes / fichiers orphelins).
+# Walk up the parent chain to find the real `claude` process PID
+# (used by the extension to detect dead sessions / orphan files).
 find_claude_pid() {
   local p="$PPID" i=0
   while [ "$p" -gt 1 ] && [ "$i" -lt 8 ]; do
@@ -47,7 +48,7 @@ find_claude_pid() {
 }
 pid="$(find_claude_pid)"
 
-# Écriture atomique (tmp + mv) pour que l'extension ne lise jamais un fichier partiel.
+# Atomic write (tmp + mv) so the extension never reads a partial file.
 tmp="$dir/.$sid.$$.tmp"
 jq -nc \
   --arg sid "$sid" \

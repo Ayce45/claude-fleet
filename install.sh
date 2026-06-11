@@ -1,32 +1,32 @@
 #!/usr/bin/env bash
-# Installe l'extension GNOME "Claude Fleet" (partie panel uniquement, sans toucher
-# à ~/.claude/settings.json). Pour câbler les hooks, lance ensuite install-hooks.sh.
+# Installs the "Claude Fleet" GNOME extension (panel part only, without touching
+# ~/.claude/settings.json). To wire the hooks, run install-hooks.sh afterwards.
 set -euo pipefail
 
 UUID="claude-fleet@Ayce45"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 DEST="$HOME/.local/share/gnome-shell/extensions/$UUID"
 
-echo ">> Installation de l'extension dans $DEST"
+echo ">> Installing the extension into $DEST"
 mkdir -p "$DEST"
 cp -f "$SRC/extension/metadata.json" "$DEST/"
 cp -f "$SRC/extension/extension.js"  "$DEST/"
 cp -f "$SRC/extension/stylesheet.css" "$DEST/"
 
-echo ">> Rend le hook exécutable"
+echo ">> Making the hook executable"
 chmod +x "$SRC/hooks/claude-fleet-hook.sh"
 
-echo ">> Activation de l'extension"
+echo ">> Enabling the extension"
 gnome-extensions enable "$UUID" 2>/dev/null || \
-  echo "   (activation échouée : active-la après relog via 'gnome-extensions enable $UUID')"
+  echo "   (enable failed: enable it after relog via 'gnome-extensions enable $UUID')"
 
 cat <<EOF
 
-OK. Extension copiée.
+Done. Extension copied.
 
-⚠️  Wayland : on ne peut pas recharger GNOME Shell à chaud.
-    -> Déconnecte/reconnecte ta session (logout/login) pour la charger.
+⚠️  Wayland: GNOME Shell cannot be reloaded on the fly.
+    -> Log out / log back in to load it.
 
-Ensuite, câble les hooks Claude Code :
+Next, wire the Claude Code hooks:
     $SRC/install-hooks.sh
 EOF
