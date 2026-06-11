@@ -1,0 +1,13 @@
+.claude-fleet-box {
+    spacing: 3px;
+}
+
+.claude-fleet-robot {
+    padding-right: 0;
+}
+
+.claude-fleet-counts {
+    font-feature-settings: "tnum";
+    font-weight: bold;
+    letter-spacing: -0.5px;
+}

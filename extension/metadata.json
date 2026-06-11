@@ -1,0 +1,8 @@
+{
+  "uuid": "claude-fleet@ejuge",
+  "name": "Claude Fleet",
+  "description": "Affiche dans la barre GNOME le nombre de sessions Claude Code actives, avec un compteur par état : en cours (🟢), en attente d'action (🟠), terminé/inactif (⚪). Détail par session dans le menu déroulant.",
+  "shell-version": ["43", "44"],
+  "version": 1,
+  "url": "https://github.com/Ayce45/claude-fleet"
+}
