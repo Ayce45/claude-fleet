@@ -60,3 +60,7 @@ cp -f ~/.claude/settings.json.bak.<timestamp> ~/.claude/settings.json
 - No preferences page (polling interval, emoji/badge choice) — hardcoded.
 - Tested on GNOME Shell 43 (Wayland). `shell-version` metadata: 43, 44.
   For GNOME ≥ 45 you would need to port `extension.js` to ESM modules.
+
+## License
+
+[MIT](LICENSE) © Ayce45
