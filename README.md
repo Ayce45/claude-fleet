@@ -1,62 +1,62 @@
-# Claude Fleet — indicateur GNOME des sessions Claude Code
+# Claude Fleet — GNOME indicator for Claude Code sessions
 
-Affiche dans la barre du haut GNOME le nombre de sessions Claude Code et leur état,
-avec des petits logos :
+Shows the number of Claude Code sessions and their state in the GNOME top bar,
+with small status badges:
 
 ```
 🤖 🟢2 🟠1 ⚪0
 ```
 
-- 🟢 **working** — Claude traite une requête (en cours)
-- 🟠 **waiting** — Claude réclame une action (permission, question…)
-- ⚪ **idle** — Claude a fini de répondre / session au repos
+- 🟢 **working** — Claude is processing a request (in progress)
+- 🟠 **waiting** — Claude needs an action (permission, question…)
+- ⚪ **idle** — Claude finished responding / session at rest
 
-Clic sur l'icône → détail par session (état + dossier de travail).
+Click the icon → per-session detail (state + working directory).
 
-## Comment ça marche
+## How it works
 
-Pas d'inspection de processus fragile : Claude Code expose des **hooks**. Un petit
-script (`hooks/claude-fleet-hook.sh`) est branché sur les évènements et écrit l'état
-de chaque session dans `$XDG_RUNTIME_DIR/claude-fleet/<session_id>.json` :
+No fragile process inspection: Claude Code exposes **hooks**. A small script
+(`hooks/claude-fleet-hook.sh`) is wired to the events and writes each session's
+state to `$XDG_RUNTIME_DIR/claude-fleet/<session_id>.json`:
 
-| Évènement Claude   | État écrit |
-|--------------------|------------|
-| `UserPromptSubmit` | working    |
-| `Notification`     | waiting    |
-| `Stop`             | idle       |
-| `SessionStart`     | idle       |
-| `SessionEnd`       | (supprimé) |
+| Claude event       | State written |
+|--------------------|---------------|
+| `UserPromptSubmit` | working       |
+| `Notification`     | waiting       |
+| `Stop`             | idle          |
+| `SessionStart`     | idle          |
+| `SessionEnd`       | (removed)     |
 
-L'extension lit ce dossier toutes les 2 s et compte les états. Si une session a
-planté sans `SessionEnd`, l'extension détecte que le PID `claude` est mort et
-supprime le fichier orphelin (auto-réparation).
+The extension reads this directory every 2 s and counts the states. If a session
+crashed without `SessionEnd`, the extension detects that the `claude` PID is dead
+and removes the orphan file (self-healing).
 
 ## Installation
 
 ```bash
-./install.sh         # copie l'extension dans ~/.local/share/gnome-shell/extensions
-./install-hooks.sh   # câble les hooks dans ~/.claude/settings.json (avec backup)
+./install.sh         # copies the extension into ~/.local/share/gnome-shell/extensions
+./install-hooks.sh   # wires the hooks into ~/.claude/settings.json (with backup)
 ```
 
-⚠️ **Wayland** (ton cas) : GNOME Shell ne se recharge pas à chaud.
-→ **Déconnexion / reconnexion** de la session pour charger l'extension.
+⚠️ **Wayland**: GNOME Shell does not reload on the fly.
+→ **Log out / log back in** to load the extension.
 
-Les hooks ne s'appliquent qu'aux **nouvelles** sessions Claude (settings.json est lu
-au démarrage de `claude`).
+Hooks only apply to **new** Claude sessions (settings.json is read when `claude`
+starts).
 
-## Désinstallation
+## Uninstall
 
 ```bash
 gnome-extensions disable claude-fleet@ejuge
 rm -rf ~/.local/share/gnome-shell/extensions/claude-fleet@ejuge
-# restaurer la sauvegarde settings.json affichée par install-hooks.sh :
-cp -f ~/.claude/settings.json.bak.<horodatage> ~/.claude/settings.json
+# restore the settings.json backup printed by install-hooks.sh:
+cp -f ~/.claude/settings.json.bak.<timestamp> ~/.claude/settings.json
 ```
 
-## Limites du prototype
+## Prototype limitations
 
-- États basés sur les hooks : un `working` reste affiché tant que `Stop` n'a pas
-  tiré (donc fidèle, mais dépend des hooks Claude).
-- Pas de page de préférences (intervalle de polling, choix emoji/pastilles) — codé en dur.
-- Testé sur GNOME Shell 43 (Wayland). Métadonnée `shell-version` : 43, 44.
-  Pour GNOME ≥ 45 il faudrait porter `extension.js` en modules ESM.
+- Hook-based states: a `working` state stays shown until `Stop` fires (so it's
+  faithful, but depends on Claude's hooks).
+- No preferences page (polling interval, emoji/badge choice) — hardcoded.
+- Tested on GNOME Shell 43 (Wayland). `shell-version` metadata: 43, 44.
+  For GNOME ≥ 45 you would need to port `extension.js` to ESM modules.
