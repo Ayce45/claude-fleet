@@ -3,7 +3,7 @@
 # à ~/.claude/settings.json). Pour câbler les hooks, lance ensuite install-hooks.sh.
 set -euo pipefail
 
-UUID="claude-fleet@ejuge"
+UUID="claude-fleet@Ayce45"
 SRC="$(cd "$(dirname "$0")" && pwd)"
 DEST="$HOME/.local/share/gnome-shell/extensions/$UUID"
 

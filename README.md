@@ -47,8 +47,8 @@ starts).
 ## Uninstall
 
 ```bash
-gnome-extensions disable claude-fleet@ejuge
-rm -rf ~/.local/share/gnome-shell/extensions/claude-fleet@ejuge
+gnome-extensions disable claude-fleet@Ayce45
+rm -rf ~/.local/share/gnome-shell/extensions/claude-fleet@Ayce45
 # restore the settings.json backup printed by install-hooks.sh:
 cp -f ~/.claude/settings.json.bak.<timestamp> ~/.claude/settings.json
 ```
